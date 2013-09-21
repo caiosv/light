@@ -1,0 +1,98 @@
+#!/usr/bin/env python
+
+import sys
+import os
+import re
+import getopt
+from subprocess import call, Popen, PIPE
+
+
+VERSION = '0.1.0'
+
+
+def _arg_parse(argv):
+    try:
+        opts, args = getopt.getopt(argv, 'hvp:a:', ['help', 'version', 'path=', 'add='])
+    except getopt.GetoptError:
+        print 'Usage: rmif -p <path> -a <ext_files> \n' + \
+                'Type -h or --help for more.'
+        sys.exit(2)
+
+    _option_handle(opts, args)
+
+
+def _option_handle(opts, args):
+    current_dir = os.getcwd()
+    opt_arg = {'opt1': '-l', 'arg1': current_dir,
+               'opt2': '', 'arg2': ''}
+
+    if len(opts) > 0:
+        for opt, arg in opts:
+            if opt in ('-h', '--help'):
+                _open_help_file()
+                sys.exit()
+            elif opt in ('-v', '--version'):
+                print 'light rmif versions is: ', VERSION
+                sys.exit()
+            elif opt in('-p', '--path'):
+                opt_arg.update({'opt1': '-p', 'arg1': arg})
+            elif opt in ('-a', '--add'):
+                opt_arg.update({'opt2': '-a', 'arg2': arg})
+
+    _remove_ignored_files(opt_arg)
+
+
+def _remove_ignored_files(opt_arg):
+
+    files = []
+    FILES_TO_IGNORE = [
+                        '.pyc',
+                        '.py~',
+                        '.txt~', ]
+
+    opt1 = opt_arg['opt1']
+    arg1 = opt_arg['arg1']
+    opt2 = opt_arg['opt2']
+    arg2 = opt_arg['arg2']
+
+    if opt2 and arg2:
+        FILES_TO_IGNORE.append(arg2)
+
+    if opt1 == '-p':
+        proc = Popen('ls %s' % arg1, stdout=PIPE, shell=True)
+        f = proc.communicate()[0]
+        files = re.split('\\n', f)
+
+    for f in files:
+        for igf in FILES_TO_IGNORE:
+            if igf in f:
+                call('cd %s && rm %s' % (arg1, f), shell=True)
+                try:
+                    from light.colors import gray, blue
+                    print gray('File deleted: ' + blue('%s' % f, bold=True))
+                except ImportError:
+                    print 'File deleted: %s' % f
+            else:
+                continue
+
+
+def _open_help_file():
+    help_text = '\n\
+usage: rmif [option] ... [path] ... [option] ... [extession_file]\n\
+Options and arguments:\n\
+-h        : print this help message and exit (also --help)\n\
+-l        : remove ignored files in actual path (also --local)\n\
+-p [path] : remove ignored files in the given path (also --path [path])\n\
+-a [ext]  : add given extession to ignored files to remove. ex: -a .py~ (also --add [ext_file])\n\
+-V        : print the light rmif version number and exit (also --version)\n\
+.................................................................................................'
+    print '%s' % help_text
+
+
+def main():
+    argv = sys.argv[1:]
+    _arg_parse(argv)
+
+
+if __name__ == '__main__':
+    main()

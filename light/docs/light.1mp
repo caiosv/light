@@ -1,0 +1,17 @@
+.\" Manpage for Light.
+.\" Contact github.com/caiosv/light to correct erros or typos
+.TH man 8 "2013" "0.1.0" "light man page"
+.SH NAME
+light \. Pythonic framework to system administrators.
+.SH SYNOPSIS
+light [method]
+.SH DESCRIPTION 
+Light Framework give to you lots of features to help you improve your system administration.
+.SH OPTIONS
+lights does not take any options for now.
+.SH SE ALSO
+
+.SH BUGS
+No known bugs.
+.SH AUTHOR
+cSv - https://github.com/caiosv

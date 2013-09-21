@@ -1,0 +1,40 @@
+#!/usr/bin/env python
+
+import os
+import re
+from subprocess import call, Popen, PIPE
+
+
+def rmf():
+
+    cw_dir = os.getcwd()
+    print cw_dir
+
+    FILES_TO_IGNORE = [
+                        '.pyc',
+                        '.py~',
+                        '.txt~',
+                    ]
+
+    proc = Popen('ls %s' % cw_dir, stdout=PIPE, shell=True)
+    f = proc.communicate()[0]
+    files = re.split('\\n', f)
+
+    for f in files:
+        for ig in FILES_TO_IGNORE:
+            if ig in f:
+                call('cd %s && rm %s' % (cw_dir, f), shell=True)
+                try:
+                    from light.colors import gray, blue
+                    print gray('File deleted: ' + blue('%s' % f, bold=True))
+                except ImportError:
+                    print 'File deleted: %s' % f
+            else:
+                continue
+
+
+def main():
+    rmf()
+
+if __name__ == '__main__':
+    main()
