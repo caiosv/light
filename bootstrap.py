@@ -8,8 +8,26 @@ from light.api import *
 env.user = 'ubuntu'
 env.git_user_name = 'cSv'
 env.git_user_email = 'caiovianna@gmail.com'
-#env.git_repo_dotfiles = 'git://github.com/caiosv/dotfiles.git'
+env.git_repo_dotfiles = 'git://github.com/caiosv/dotfiles.git'
 
+# env project
+env.git_repo_project = 'https://github.com/caiosv/atrend_shop.git'
+env.project_base = 'atrend'
+env.project_home = 'atrend_shop'
+env.project_requirements = '%(project_home)s/atrend_requirements.txt' % env
+
+# env database
+env.db_root = ''
+env.db_root_pass = ''
+env.db_user = ''
+env.db_user_pass = ''
+env.db_pass = ''
+env.db_name = ''
+# MySQL database commands
+env.db_create_user = 'CREATE USER "%(db_user)s"@"localhost" IDENTIFIED BY "%(db_user_pass)s"' % env
+env.db_create_database = 'CREATE DATABASE %(db_name)s' % env
+env.db_grant_all_privileges = 'GRANT ALL PRIVILEGES ON %(db_name)s.* TO "%(db_user)s"@"localhost"' % env
+env.db_flush_privileges = 'FLUSH PRIVILEGES'
 
 INSTALL_PACKAGES = [
         "vim",
@@ -101,18 +119,65 @@ def clone_dotfiles():
         run('git submodule init && git submodule update')
 
 #_____SET UP VIM PLUGIN COMMAND-T_____#
-if env.git_repo_dotfiles is not "git://github.com/caiosv/dotfiles.git":
-    pass
-else:
-    print magenta('SET UP VIM PLUGIN COMMAND-T..')
-    sudo('apt-get install ruby1.8-dev')
-    with cd('%(home)s/dotfiles/vim/bundle/command-t/ruby/command-t' % env):
-        run('ruby extconf.rb')
-        run('make')
+    if env.git_repo_dotfiles is not "git://github.com/caiosv/dotfiles.git":
+        pass
+    else:
+        print magenta('SET UP VIM PLUGIN COMMAND-T..')
+        sudo('apt-get install ruby1.8-dev')
+        with cd('%(home)s/dotfiles/vim/bundle/command-t/ruby/command-t' % env):
+            run('ruby extconf.rb')
+            run('make')
 
-    print magenta('[DONE] VIM PLUGIN COMMAND-T IS READY.')
+        print magenta('[DONE] VIM PLUGIN COMMAND-T IS READY.')
 
 
+def _set_up_webservers():
+    """
+    """
+    hr()
+    print magenta("Set up Web Servers.")
+    hr()
+    with cd('%(home)s/%(project_base)s/%(project_home)s/conf/' % env):
+        print magenta('Automatic Green Unicorn..')
+        sudo('mv atrend_shop_app.conf /etc/init/')  # green unicorn automatic start
+
+        #_____set up nginx_____#
+        print magenta("Set Up Nginx..")
+        sudo('mkdir -p /opt/%(project_base)s/logs/nginx/' % env)
+        sudo('ln -s %(home)s/%(project_base)s/%(project_home)s/static /opt/atrend' % env)  # sys link static
+        sudo('mv /etc/nginx/sites-available/default /etc/nginx/sites-available/default.backup')
+        sudo('mv default /etc/nginx/sites-available/default')
+        print magenta('[DONE] Set up Web Servers.')
+
+
+def _set_up_database():
+    """
+    Set up database, create user, create database, set privileges.
+    """
+    print red('Start set up mysql:')
+    _mysql_execute(env.db_create_user, env.db_root, env.db_root_pass)
+    _mysql_execute(env.db_create_database, env.db_root, env.db_root_pass)
+    _mysql_execute(env.db_grant_all_privileges, env.db_root, env.db_root_pass)
+    _mysql_execute(env.db_flush_privileges, env.db_root, env.db_root_pass)
+    print red('[DONE] set up mysql')
+
+
+def _mysql_execute(sql, user=None, password=None):
+    """
+    Executes passed sql command using mysql shell.
+    """
+    user = user or env.conf.DB_USER
+
+    if user == 'root' and password is None:
+        password = _get_root_password()
+    elif password is None:
+        password = env.conf.DB_PASSWORD
+        sql = sql.replace("'", r'\"')
+
+    return run("echo '%s' | mysql --user='%s' --password='%s' " % (sql, user, password))
+
+
+#_____SET PROJECT_____#
 def start_project():
     """
     CLONE PROJECT FROM REPOSITORY AND THEN
@@ -142,24 +207,22 @@ def start_project():
 
             run('git clone %(git_repo_project)s' % env)
 
-            with prefix('source bin/activate'):
-                if env.project_requirements is not '':
-                    pass
-                else:
-                    env.project_requirements = raw_input(red('Please enter the path to your' + \
+            if env.project_requirements is not '':
+                pass
+            else:
+                env.project_requirements = raw_input(red('Please enter the path to your' + \
                                                                 red('requirements file', bold=True) + \
                                                                 ': '))
-                print magenta('Install Requirements..')
-                run('pip install -r %(project_requirements)s' % env)
+            print magenta('Install Requirements..')
+            run('source bin/activate && pip install -r %(project_requirements)s' % env)
 
     _set_up_webservers()
     _set_up_database()
 
     with cd('%(home)s/%(project_base)s' % env):
-        with prefix('source bin/activate'):
-            print magenta('Syncing database..')
-            with cd('%(project_home)s' % env):
-                run('python manage.py syncdb')
+        print magenta('Syncing database..')
+        with cd('%(project_home)s' % env):
+            run('. bin/activate && python manage.py syncdb')
     hr()
     print magenta('[DONE] PROJECT IS READY.')
     hr()
@@ -178,31 +241,6 @@ def restart_webservers():
     sudo('service nginx restart')
     hr()
     print magenta('[DONE] Web Servers is up.')
-
-
-def operations():
-    hr()
-    print (red("TEST OPERATIONS", bold=True))
-    hr()
-    print (magenta('Local system user: %(local_user)s' % env))
-    with cd('/home'):
-        run('pwd')
-        run('ls -la')
-        with cd('/ubuntu'):
-            run('pwd')
-            run('ls -la')
-            with cd('/confs'):
-                run('pwd')
-                run('ls -la')
-                with cd('/light'):
-                    run('pwd')
-                    run('ls -la')
-    run('virtualenv /home/ubuntu/crappy')
-    with cd('/home/ubuntu/crappy'):
-        run('pwd')
-        with prefix('source bin/activate'):
-            run('ls -la')
-    print red('%(home)s' % env)
 
 
 def main():

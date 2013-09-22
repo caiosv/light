@@ -1,17 +1,13 @@
 from distutils.core import setup
-from light.install import _man_pages
+from light.install import _man_pages, _install_commands
 
 VERSION = '0.1.0'
 
 readme = open('README.txt').read()
 
 long_description = """
-To find out what's new in this version of Fabric, please see `the changelog
+To find out what's new in this version of Light, please see `the changelog
 <http://docs.light.org/en/%s/changelog.html>`_.
-
-You can also install the `in-development version
-<https://github.com/caiosv/light/tarball/master#egg=light-dev>`_ using
-pip, with `pip install fabric==dev`.
 
 ----
 
@@ -19,7 +15,7 @@ pip, with `pip install fabric==dev`.
 
 ----
 
-For more information, please see the Light website or execute ``light --help`.
+For more information, please see the Light website or execute ``man light`.
 """ % (VERSION, readme)
 
 
@@ -36,7 +32,6 @@ setup(
     # Package Info
     packages=[
         'light',
-        'light.cmds',
         'light.api',
         'light.colors',
         'light.context_managers',
@@ -47,4 +42,5 @@ setup(
 
 )
 
-_man_pages
+_man_pages()
+_install_commands()
