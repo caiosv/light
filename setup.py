@@ -1,9 +1,9 @@
-from distutils.core import setup
+from setuptools import setup, find_packages
 from light.install import _man_pages, _install_commands
 
 VERSION = '0.1.0'
 
-readme = open('README.txt').read()
+readme = open('README.md').read()
 
 long_description = """
 To find out what's new in this version of Light, please see `the changelog
@@ -28,17 +28,36 @@ setup(
     license='LICENSE.txt',
     description='Light is a simple, Pythonic tool for execution System Administration.',
     long_description=long_description,
+     # Package Info
+    packages=find_packages(),
+    entry_points={
+            'light': [
+                'light = light.main:main',
+            ]
+    },
 
-    # Package Info
-    packages=[
-        'light',
-        'light.api',
-        'light.colors',
-        'light.context_managers',
-        'light.operations',
-        'light.state',
-        'light.utils',
-        ],
+
+
+    classifiers=[
+        'Development Status :: 5 - Production/Beta',
+        'Environment :: Console',
+        'Intended Audience :: Developers',
+        'Intended Audience :: System Administrators',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: MacOS :: MacOS X',
+        'Operating System :: Unix',
+        'Operating System :: POSIX',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 2.5',
+        'Programming Language :: Python :: 2.6',
+        'Topic :: Software Development',
+        'Topic :: Software Development :: Build Tools',
+        'Topic :: Software Development :: Libraries',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'Topic :: System :: Clustering',
+        'Topic :: System :: Software Distribution',
+        'Topic :: System :: Systems Administration',
+    ],
 
 )
 

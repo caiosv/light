@@ -24,10 +24,15 @@ def _run_command(command, shell=True, sudo=False):
     """
     if command:
 
+        if env.command_prefixes:
+            cmd_prefix = _AttributeSting(env.command_prefixes[0])
+            command = cmd_prefix + command
+
+        given_command = _AttributeSting(command)
+
         which = 'sudo' if sudo else 'run'
 
         if which == 'run':
-            given_command = _AttributeSting(command)
             print(gray('Perfoming given command: ' + \
                 blue(given_command, bold=True)))
 
@@ -39,7 +44,6 @@ def _run_command(command, shell=True, sudo=False):
                 print(white(indent(e.message) + '\n', bold=True))
                 hr()
         elif which == 'sudo':
-            given_command = _AttributeSting(command)
             print(gray('Perfoming given command:' + \
                     blue('sudo ' + command, bold=True)))
             try:
@@ -120,3 +124,19 @@ def cd(path):
         os.chdir(old_dir)
     env.cwd = ''  # clean env.cwd
     env.new_cwd = []  # clean env.new_cwd
+
+
+@contextmanager
+def prefix(command, shell=True):
+    given_command = _AttributeSting(command)
+    given_command = given_command + ' && '
+
+    if not env.command_prefixes:
+        env.command_prefixes.append(given_command)
+    else:
+        env.command_prefixes = []
+        env.command_prefixes.append(given_command)
+    try:
+        yield
+    finally:
+        pass

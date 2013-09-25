@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 #_____GLOBAL IMPORTS_____#
-
+import sys
+import getopt
 #_____LIGHT PACKAGES IMPORTS_____#
 from light.api import *
+from light.operations import prefix
 
 #_____SET ENVIRONMENT_____#
 env.user = 'ubuntu'
@@ -46,6 +48,9 @@ INSTALL_PACKAGES = [
         "mysql-client",
         "libmysqlclient-dev"
         ]
+
+# VERSION
+VERSION = '0.1.0'
 
 
 def install_packages():
@@ -214,18 +219,30 @@ def start_project():
                                                                 red('requirements file', bold=True) + \
                                                                 ': '))
             print magenta('Install Requirements..')
-            run('source bin/activate && pip install -r %(project_requirements)s' % env)
+            with prefix('. bin/activate'):
+                run('pip install -r %(project_requirements)s' % env)
 
     _set_up_webservers()
     _set_up_database()
 
-    with cd('%(home)s/%(project_base)s' % env):
+    with cd('%(home)s/%(project_base)s/%(project_home)s' % env):
         print magenta('Syncing database..')
-        with cd('%(project_home)s' % env):
-            run('. bin/activate && python manage.py syncdb')
+        with prefix('. bin/activate'):
+            run('python manage.py syncdb')
     hr()
     print magenta('[DONE] PROJECT IS READY.')
     hr()
+
+
+def update_project():
+    """
+    Updates the remote project
+    """
+    with cd('%(home)s/%(project_base)s' % env):
+        run('git pull')
+        with prefix('. bin/activate'):
+            run('pip install -r %(project_requirements)s' % env)
+            run('python manage.py syncdb')
 
 
 def restart_webservers():
@@ -243,13 +260,46 @@ def restart_webservers():
     print magenta('[DONE] Web Servers is up.')
 
 
+def operations():
+    with cd('/home/ubuntu/confs/light'), prefix('. bin/activate'):
+            run('pip install ipython')
+
+
+def caio():
+    print "HELO MY NEW BABY"
+
+
 def main():
     from datetime import datetime
     startTime = datetime.now()
+    #argv = sys.argv[1:]
+    #_job_execute(argv).execute()
     #install_packages()
     #git_global_config()
-    operations()
-    print (datetime.now() - startTime)
+    #operations()
+
+    from light.main import file_find_word
+    m_dict = file_find_word('/home/ubuntu/confs/light/lightfile.py')
+
+    """
+    from light.read_methods_file import file_find_word
+    m_dict = file_find_word('/home/ubuntu/confs/light/bootstrap.py')
+    print blue(m_dict)
+
+    list_keys = list(m_dict.iterkeys())
+    for key in list_keys:
+        val = m_dict.get(key)
+        print yellow(val)
+        up_dic = {key: eval(val)}
+        m_dict.update(up_dic)
+    print red(m_dict)
+    """
+    #methods = {'git_global_config': git_global_config, 'operations': operations}
+
+    from light.main import job_execute
+    job_execute(sys.argv, m_dict).execute()
+
+    print red('It took: ' + str(datetime.now() - startTime), bold=True)
 
 if __name__ == '__main__':
     main()
