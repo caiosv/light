@@ -7,16 +7,16 @@ from light.api import *
 from light.operations import prefix
 
 #_____SET ENVIRONMENT_____#
-env.user = 'ubuntu'
-env.git_user_name = 'cSv'
-env.git_user_email = 'caiovianna@gmail.com'
+env.user = ''
+env.git_user_name = ''
+env.git_user_email = ''
 env.git_repo_dotfiles = 'git://github.com/caiosv/dotfiles.git'
 
 # env project
-env.git_repo_project = 'https://github.com/caiosv/atrend_shop.git'
-env.project_base = 'atrend'
-env.project_home = 'atrend_shop'
-env.project_requirements = '%(project_home)s/atrend_requirements.txt' % env
+env.git_repo_project = ''
+env.project_base = ''
+env.project_home = ''
+env.project_requirements = '%(project_home)s/' % env
 
 # env database
 env.db_root = ''
@@ -260,41 +260,16 @@ def restart_webservers():
     print magenta('[DONE] Web Servers is up.')
 
 
-def operations():
-    with cd('/home/ubuntu/confs/light'), prefix('. bin/activate'):
-            run('pip install ipython')
-
-
-def caio():
-    print "HELO MY NEW BABY"
-
-
 def main():
     from datetime import datetime
     startTime = datetime.now()
-    #argv = sys.argv[1:]
-    #_job_execute(argv).execute()
-    #install_packages()
-    #git_global_config()
-    #operations()
+    install_packages()
+    git_global_config()
+    start_project()
+    restart_webservers()
 
     from light.main import file_find_word
     m_dict = file_find_word('/home/ubuntu/confs/light/lightfile.py')
-
-    """
-    from light.read_methods_file import file_find_word
-    m_dict = file_find_word('/home/ubuntu/confs/light/bootstrap.py')
-    print blue(m_dict)
-
-    list_keys = list(m_dict.iterkeys())
-    for key in list_keys:
-        val = m_dict.get(key)
-        print yellow(val)
-        up_dic = {key: eval(val)}
-        m_dict.update(up_dic)
-    print red(m_dict)
-    """
-    #methods = {'git_global_config': git_global_config, 'operations': operations}
 
     from light.main import job_execute
     job_execute(sys.argv, m_dict).execute()
