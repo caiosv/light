@@ -139,4 +139,4 @@ def prefix(command, shell=True):
     try:
         yield
     finally:
-        pass
+        env.command_prefixes = []

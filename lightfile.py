@@ -1,30 +1,28 @@
 #!/usr/bin/env python
 #_____GLOBAL IMPORTS_____#
 import sys
-import getopt
 #_____LIGHT PACKAGES IMPORTS_____#
 from light.api import *
 from light.operations import prefix
 
 #_____SET ENVIRONMENT_____#
-env.user = ''
-env.git_user_name = ''
-env.git_user_email = ''
+env.user = 'ubuntu'
+env.git_user_name = 'cSv'
+env.git_user_email = 'caiovianna@gmail.com'
 env.git_repo_dotfiles = 'git://github.com/caiosv/dotfiles.git'
 
 # env project
-env.git_repo_project = ''
-env.project_base = ''
-env.project_home = ''
-env.project_requirements = '%(project_home)s/' % env
+env.git_repo_project = 'https://github.com/caiosv/atrend_shop.git'
+env.project_base = 'atrend'
+env.project_home = 'atrend_shop'
+env.project_requirements = '%(project_home)s/atrend_requirements.txt' % env
 
 # env database
-env.db_root = ''
+env.db_root = 'root'
 env.db_root_pass = ''
-env.db_user = ''
+env.db_user = 'csv'
 env.db_user_pass = ''
-env.db_pass = ''
-env.db_name = ''
+env.db_name = 'atrend'
 # MySQL database commands
 env.db_create_user = 'CREATE USER "%(db_user)s"@"localhost" IDENTIFIED BY "%(db_user_pass)s"' % env
 env.db_create_database = 'CREATE DATABASE %(db_name)s' % env
@@ -46,7 +44,8 @@ INSTALL_PACKAGES = [
         "python-mysqldb",
         "mysql-common",
         "mysql-client",
-        "libmysqlclient-dev"
+        "libmysqlclient-dev",
+        "openjdk-7-jre"
         ]
 
 # VERSION
@@ -192,22 +191,22 @@ def start_project():
     print magenta('START PROJECT')
     hr()
     with cd('%(home)s' % env):
-        if env.base_project is not '':
+        if env.project_base is not '':
             pass
         else:
-            env.base_project = raw_input(red('Please enter the path to set your project\n \
+            env.project_base = raw_input(red('Please enter the path to set your project\n \
                                                 to prepare a virtualenv environment and\n \
                                                 clone your project. Assume the path starts\n \
                                                 at ' + yellow('%(home)s/' % env, bold=True)))
         run('virtualenv %(project_base)s' % env)
-        with cd('%(project_base)s' % env):
+        with cd('/%(project_base)s' % env):
             if env.git_repo_project is not '':
                 pass
             else:
                 env.git_repo_project = raw_input(red('Please enter the repository to your project: '))
 
             print magenta('Git clone repository from:' + \
-                            yellow('%(git_repo_project)s' + '\nto:' + \
+                            yellow('%(git_repo_project)s' % env + '\n to:' + \
                             '%(home)s/%(project_base)s' % env, bold=True))
 
             run('git clone %(git_repo_project)s' % env)
@@ -225,10 +224,9 @@ def start_project():
     _set_up_webservers()
     _set_up_database()
 
-    with cd('%(home)s/%(project_base)s/%(project_home)s' % env):
-        print magenta('Syncing database..')
-        with prefix('. bin/activate'):
-            run('python manage.py syncdb')
+    with cd('%(home)s/%(project_base)s/' % env), prefix('. bin/activate'):
+            print magenta('Syncing database..')
+            run('python %(project_home)s/manage.py syncdb' % env)
     hr()
     print magenta('[DONE] PROJECT IS READY.')
     hr()
@@ -263,16 +261,16 @@ def restart_webservers():
 def main():
     from datetime import datetime
     startTime = datetime.now()
-    install_packages()
-    git_global_config()
+    #install_packages()
+    #git_global_config()
     start_project()
     restart_webservers()
 
-    from light.main import file_find_word
-    m_dict = file_find_word('/home/ubuntu/confs/light/lightfile.py')
+    #from light.main import file_find_word
+    #m_dict = file_find_word('/home/ubuntu/confs/light/lightfile.py')
 
-    from light.main import job_execute
-    job_execute(sys.argv, m_dict).execute()
+    #from light.main import job_execute
+    #job_execute(sys.argv, m_dict).execute()
 
     print red('It took: ' + str(datetime.now() - startTime), bold=True)
 
