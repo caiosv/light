@@ -19,9 +19,9 @@ env.project_requirements = '%(project_home)s/atrend_requirements.txt' % env
 
 # env database
 env.db_root = 'root'
-env.db_root_pass = 'toor'
-env.db_user = 'csv'
-env.db_user_pass = 'atrend08128813'
+env.db_root_pass = ''
+env.db_user = ''
+env.db_user_pass = ''
 env.db_name = 'atrend'
 # MySQL database commands
 env.db_create_user = 'CREATE USER "%(db_user)s"@"localhost" IDENTIFIED BY "%(db_user_pass)s"' % env
