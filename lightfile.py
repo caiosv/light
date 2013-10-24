@@ -19,9 +19,9 @@ env.project_requirements = '%(project_home)s/atrend_requirements.txt' % env
 
 # env database
 env.db_root = 'root'
-env.db_root_pass = ''
+env.db_root_pass = 'toor'
 env.db_user = 'csv'
-env.db_user_pass = ''
+env.db_user_pass = 'atrend08128813'
 env.db_name = 'atrend'
 # MySQL database commands
 env.db_create_user = 'CREATE USER "%(db_user)s"@"localhost" IDENTIFIED BY "%(db_user_pass)s"' % env
@@ -37,7 +37,6 @@ INSTALL_PACKAGES = [
         "nginx",
         "nginx-full",
         "git",
-        "git-man",
         "nginx",
         "nginx-full",
         "mysql-server",
@@ -45,7 +44,6 @@ INSTALL_PACKAGES = [
         "mysql-common",
         "mysql-client",
         "libmysqlclient-dev",
-        "openjdk-7-jre"
         ]
 
 # VERSION
@@ -116,7 +114,7 @@ def clone_dotfiles():
 
     print magenta('MAKE SYS LINK TO .vim and .vimrc' % env)
     run('ln -s %(home)s/dotfiles/vim %(home)s/.vim' % env)
-    run('ln -s %(home)s/dotfiles/vimrc %(home)s/.vimrc' % env)
+    run('ln -s %(home)s/dotfiles/vim/vimrc %(home)s/.vimrc' % env)
 
     print magenta('INIT GIT SUBMODULE AND UPDATE IT')
     with cd('%(home)s/dotfiles' % env):
@@ -263,8 +261,9 @@ def main():
     startTime = datetime.now()
     #install_packages()
     #git_global_config()
-    start_project()
-    restart_webservers()
+    clone_dotfiles()
+    #start_project()
+    #restart_webservers()
 
     #from light.main import file_find_word
     #m_dict = file_find_word('/home/ubuntu/confs/light/lightfile.py')
